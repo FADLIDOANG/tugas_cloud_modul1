@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Card</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(circle at top left, rgba(81, 150, 255, 0.28), transparent 35%),
+                    linear-gradient(135deg, #081b2d 0%, #102c4d 36%, #1b4c7c 100%);
+        color: #edf6ff;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 32px;
+        transition: background 0.35s ease, color 0.35s ease;
+      }
+
+      body.light {
+        background: linear-gradient(135deg, #edf5ff 0%, #dfeeff 35%, #cfe1ff 100%);
+        color: #10253d;
+      }
+
+      .card-scene {
+        perspective: 1600px;
+        width: min(94vw, 560px);
+        height: 520px;
+      }
+
+      .card-shell {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .card {
+        position: absolute;
+        inset: 0;
+        background: rgba(12, 25, 38, 0.58);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 26px;
+        box-shadow: 0 28px 70px rgba(0,0,0,0.28);
+        padding: 26px 24px 20px;
+        backdrop-filter: blur(8px);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateY(0);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.35s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 32px 80px rgba(0,0,0,0.35);
+      }
+
+      .card.front {
+        z-index: 2;
+      }
+
+      .card.back {
+        transform: rotateY(180deg);
+        overflow: hidden;
+        padding: 0;
+      }
+
+      body.light .card {
+        background: rgba(255,255,255,0.72);
+        border-color: rgba(10, 30, 48, 0.08);
+        box-shadow: 0 28px 70px rgba(29, 75, 117, 0.18);
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 14px;
+      }
+
+      .avatar-wrap {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        padding: 3px;
+        background: linear-gradient(135deg, #75e7d5, #4dc8d7 50%, #7aa9ff);
+        box-shadow: 0 18px 30px rgba(80, 170, 228, 0.26);
+        overflow: hidden;
+        transform-style: preserve-3d;
+        transition: transform 0.7s ease, box-shadow 0.25s ease;
+      }
+
+      .avatar-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+      }
+
+      body.detail-open .avatar-wrap {
+        animation: avatarSpin 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      @keyframes avatarSpin {
+        0% {
+          transform: rotateY(0deg) scale(1);
+        }
+        35% {
+          transform: rotateY(90deg) scale(1.06);
+        }
+        100% {
+          transform: rotateY(180deg) scale(1.12);
+        }
+      }
+
+      .identity {
+        text-align: left;
+        flex: 1;
+      }
+
+      .identity h1 {
+        margin: 0;
+        font-size: clamp(1.95rem, 3vw, 2.5rem);
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        font-weight: 700;
+      }
+
+      .status {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(102, 220, 173, 0.14);
+        border: 1px solid rgba(116, 227, 188, 0.48);
+        color: #b9f8dc;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      body.light .status {
+        background: rgba(31, 149, 107, 0.08);
+        color: #0d7a59;
+        border-color: rgba(31, 149, 107, 0.24);
+      }
+
+      .divider {
+        height: 1px;
+        background: rgba(255,255,255,0.1);
+        margin: 16px 0 18px;
+      }
+
+      body.light .divider {
+        background: rgba(10, 30, 48, 0.08);
+      }
+
+      .info {
+        display: grid;
+        gap: 10px;
+      }
+
+      .row {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+
+      body.light .row {
+        border-bottom-color: rgba(10, 30, 48, 0.08);
+      }
+
+      .row:last-child {
+        border-bottom: none;
+      }
+
+      .row label {
+        min-width: 80px;
+        font-weight: 700;
+        color: rgba(230,240,255,0.72);
+      }
+
+      body.light .row label {
+        color: rgba(16, 37, 61, 0.7);
+      }
+
+      .row span {
+        color: #f5fbff;
+        flex: 1;
+      }
+
+      body.light .row span {
+        color: #112b42;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        color: rgba(228,240,255,0.78);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+      }
+
+      body.light .footer {
+        border-top-color: rgba(10, 30, 48, 0.08);
+        color: rgba(16, 37, 61, 0.72);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(126, 234, 176, 0.12);
+        border: 1px solid rgba(126,234,176,0.45);
+        color: #baf7dd;
+        font-weight: 700;
+      }
+
+      .pill::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #7ae8ba;
+        box-shadow: 0 0 12px rgba(122, 232, 186, 0.8);
+      }
+
+      body.light .pill {
+        color: #0c7a58;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .btn {
+        flex: 1;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .primary {
+        background: linear-gradient(180deg, #3a93ff, #2a6ae7);
+        color: #fff;
+        box-shadow: 0 14px 28px rgba(52, 120, 228, 0.3);
+      }
+
+      .secondary {
+        background: rgba(255,255,255,0.06);
+        color: #eef8ff;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      body.light .secondary {
+        background: rgba(16, 37, 61, 0.04);
+        color: #112b42;
+        border-color: rgba(16, 37, 61, 0.08);
+      }
+
+      .back-photo {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .back-photo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(1.15) contrast(1.05);
+      }
+
+      .back-photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(8, 17, 28, 0.1), rgba(8, 17, 28, 0.7));
+      }
+
+      @media (max-width: 480px) {
+        .card {
+          padding: 22px 18px 18px;
+        }
+
+        .top {
+          gap: 14px;
+        }
+
+        .avatar-wrap {
+          width: 72px;
+          height: 72px;
+        }
+
+        .row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+
+        .row label {
+          min-width: 0;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-scene" id="cardScene">
+      <div class="card-shell">
+        <div class="card front">
+          <div class="top">
+            <div class="avatar-wrap">
+              <img src="./—PHOENIX%20Icon_.jpe" alt="Foto profil Fadli Alamsyah" />
+            </div>
+            <div class="identity">
+              <span class="status">Mahasiswa</span>
+              <h1>Fadli Alamsyah</h1>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info">
+            <div class="row"><label>NIM</label><span>10204243001</span></div>
+            <div class="row"><label>Status</label><span>Mahasiswa</span></div>
+            <div class="row"><label>Universitas</label><span>Telkom University Jakarta</span></div>
+          </div>
+
+          <div class="footer">
+            <span>CV Pribadi</span>
+            <span class="pill">Aktif</span>
+          </div>
+
+          <div class="actions">
+            <button id="themeToggle" class="btn primary">Ubah Tema Warna</button>
+            <button id="pulseBtn" class="btn secondary">Lihat Detail</button>
+          </div>
+        </div>
+
+        <div class="card back" aria-label="Detail foto profil">
+          <div class="back-photo">
+            <img src="./Phoenix%20Fuck%20You.png" alt="Detail foto profil" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const body = document.body;
+      const themeToggle = document.getElementById('themeToggle');
+      const pulseBtn = document.getElementById('pulseBtn');
+      const cardScene = document.getElementById('cardScene');
+      const cardShell = document.querySelector('.card-shell');
+      let flipAngle = 0;
+
+      const updateCardState = () => {
+        const isFrontVisible = flipAngle % 360 === 0;
+        pulseBtn.textContent = isFrontVisible ? 'Lihat Detail' : 'Tutup Detail';
+        cardShell.style.transform = `rotateY(${flipAngle}deg)`;
+      };
+
+      const toggleCard = () => {
+        flipAngle += 180;
+        updateCardState();
+      };
+
+      themeToggle.addEventListener('click', () => {
+        body.classList.toggle('light');
+        themeToggle.textContent = body.classList.contains('light') ? 'Kembali ke Gelap' : 'Ubah Tema Warna';
+      });
+
+      pulseBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleCard();
+      });
+
+      cardScene.addEventListener('click', (event) => {
+        if (event.target.closest('button')) {
+          return;
+        }
+        toggleCard();
+      });
+
+      updateCardState();
+    </script>
+  </body>
+</html>
